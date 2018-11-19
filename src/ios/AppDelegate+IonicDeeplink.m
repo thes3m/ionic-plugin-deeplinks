@@ -43,6 +43,17 @@ static NSString *const PLUGIN_NAME = @"IonicDeeplinkPlugin";
     IonicDeeplinkPlugin *plugin = [self.viewController getCommandInstance:PLUGIN_NAME];
 
     if(plugin == nil) {
+      //If plugin is not available add onetime observer that will handle deeplink continuity when webview will appear
+      __block id observer = nil;
+      observer = [[NSNotificationCenter defaultCenter] addObserverForName:@"CDVViewDidAppearNotification" object:nil queue:nil usingBlock: ^(NSNotification *block){
+          if(observer != nil){
+              [[NSNotificationCenter defaultCenter] removeObserver:observer];
+              observer = nil;
+          }
+          
+          IonicDeeplinkPlugin *plugin = [self.viewController getCommandInstance:PLUGIN_NAME];
+          [plugin handleContinueUserActivity:userActivity];
+      }];
       return NO;
     }
 
